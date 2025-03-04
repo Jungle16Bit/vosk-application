@@ -5,19 +5,12 @@ import os
 import download_audio as dla
 
 # caminho do modelo
-model_path_en = "models/vosk-model-small-pt-0.3"
-
-#função para conversão de audio
-def convert(audio_in, audio_out):
-    os.system(f"ffmpeg -i {audio_in} -ar 16000 -ac 1 -c:a pcm_s16le {audio_out} -y")
+model_path = r"vosk_for_transcribe/models/vosk-model-small-pt-0.3"
 
 #função para transcrição do audio
-def transcribe_audio(audio_in ,audio_out, model_path):
-    wav_audio = audio_out
+def transcribe_audio(audio, model_path):
 
-    convert(audio_in, wav_audio)
-
-    with wave.open(wav_audio, "rb") as wav:
+    with wave.open(audio, "rb") as wav:
         if wav.getnchannels() != 1 or wav.getsampwidth() != 2 or wav.getframerate() != 16000:
             raise ValueError("O áudio precisa estar em mono, 16-bit e 16kHz!")
 
@@ -37,17 +30,14 @@ def transcribe_audio(audio_in ,audio_out, model_path):
         result_text = json.loads(recognizer.Result())
         text_trasncribe += result_text.get("text", "")
 
-    os.remove(wav_audio)
     return text_trasncribe.strip()
 
 if __name__ == "__main__":
 
     #caminho do audio
-    audio_path_in = dla.down_ren()
-    audio_path_out = "audio/temp.wav"
-
-    text_result = transcribe_audio(audio_path_in, audio_path_out, model_path_en)
+    audio = dla.run()
+    text_result = transcribe_audio(audio, model_path)
     os.system("cls")
     #imprimindo audio transcrito
     print(f"Transcrição: {text_result}")
-    os.remove(audio_path_in)
+    os.remove(audio)
